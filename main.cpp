@@ -99,7 +99,8 @@ void *io_thread(void * args)
 					}
 					else
 					{
-						socketManager->SendCommand(SET_FREQUENCY, frequency);
+						SocketCommand frequencyCommand(Command::SET_FREQUENCY, frequency);
+						socketManager->SendCommand(frequencyCommand);
 						printf("Frequency set to %d Hz\n", frequency);
 						sleep(1);
 						printf("Signal power is %f dB\n", signalPower);
@@ -117,7 +118,8 @@ void *io_thread(void * args)
 					}
 					else
 					{
-						socketManager->SendCommand(SET_FREQUENCY, frequency);
+						SocketCommand frequencyCommand(Command::SET_FREQUENCY, frequency);
+						socketManager->SendCommand(frequencyCommand);
 						printf("Frequency set to %d Hz\n", frequency);
 						sleep(1);
 						printf("Signal power is %f dB\n", signalPower);
@@ -136,7 +138,8 @@ void *io_thread(void * args)
 				if (new_frequency >= LOWEST_FREQUENCY && new_frequency <= HIGHEST_FREQUENCY)
 				{
 					frequency = new_frequency;
-					socketManager->SendCommand(SET_FREQUENCY, frequency);
+					SocketCommand frequencyCommand(Command::SET_FREQUENCY, frequency);
+					socketManager->SendCommand(frequencyCommand);
 					printf("Frequency set to %d Hz\n", frequency);
 					sleep(1);
 					printf("Signal power is %f dB\n", signalPower);
@@ -203,15 +206,15 @@ int main(int argc, char *argv[])
 
 	// Declare and initialize some variables
 	int option;
-	int signalLength = (int) ( (float) RAW_SIGNAL_SAMPLE_RATE * (float) SIGNAL_BLOCK_PERIOD );
+	int signalLength = (int) ( (float) RAW_SIGNAL_SAMPLE_RATE * (float) SIGNAL_BLOCK_PERIOD * 2);
 	double * filter1;
 	double * filter2;
 	double * coeff = (double *) malloc(sizeof(double));
 	char filter_location[300];
 
 	// The input buffer in which the samples are received
-	unsigned char * inBuffer = (unsigned char *) malloc(signalLength * 2);
-	memset(inBuffer, 0, signalLength*2);
+	unsigned char * inBuffer = (unsigned char *) malloc(signalLength);
+	memset(inBuffer, 0, signalLength);
 
 	// Initialize the sound player that uses Pulse Audio Library
 	SoundPlayer soundPlayer(NUMBER_OF_AUDIO_CHANNELS, AUDIO_SAMPLE_RATE);
@@ -305,6 +308,8 @@ int main(int argc, char *argv[])
     if (mode == ModeStereo)
     {
     	// Declare the signal blocks buffers
+    	Complex * initializedInputSignal = NULL;
+    	int initializedInputSignalLength;
 		Complex * decimatedFmSignal = NULL;
 		int decimatedFmSignalLength;
 		double * demodSignal = NULL;
@@ -368,17 +373,17 @@ int main(int argc, char *argv[])
 		while (running)
 		{
 			// Read a 250 ms buffer from rtl_tcp via socket
-			if (socketManager.ReadFromSocket(inBuffer, signalLength * 2) < 0)
+			if (socketManager.ReadFromSocket(inBuffer, signalLength) < 0)
 			{
 				printf ("Could not read samples from socket!\n");
 				return -1;
 			}
 
 			// Instantiate a signal object from the received block
-			Signal signal(inBuffer, signalLength);
+			Signal::initSignalFromSocket(inBuffer, signalLength, &initializedInputSignal, &initializedInputSignalLength);
 
 			// Decimate and filter the initial signal
-			if (Signal::decimate(signal.samples, signal.len, &decimatedFmSignal, &decimatedFmSignalLength, filter1, filterLength1, STEREO_FIRST_DECIMATION_FACTOR) < 0)
+			if (Signal::decimate(initializedInputSignal, initializedInputSignalLength, &decimatedFmSignal, &decimatedFmSignalLength, filter1, filterLength1, STEREO_FIRST_DECIMATION_FACTOR) < 0)
 			{
 				return -1;
 			}
@@ -444,6 +449,8 @@ int main(int argc, char *argv[])
     else if (mode == ModeMono)
     {
     	// Declare the signal blocks buffers
+    	Complex * initializedInputSignal = NULL;
+    	int initializedInputSignalLength;
     	Complex * decimatedSamples = NULL;
     	int decimatedSamplesLength;
     	double * fmDemodulatedSamples = NULL;
@@ -498,17 +505,17 @@ int main(int argc, char *argv[])
     	{
 
     		// Read a 250 ms samples block from the rtl_tcp program via socket
-    		if (socketManager.ReadFromSocket(inBuffer, signalLength * 2) < 0)
+    		if (socketManager.ReadFromSocket(inBuffer, signalLength) < 0)
     		{
     			printf ("Could not read samples from socket!\n");
     			return -1;
     		}
 
     		// Instantiate a signal object based on the raw signal block
-    		Signal signal(inBuffer, signalLength);
+    		Signal::initSignalFromSocket(inBuffer, signalLength, &initializedInputSignal, &initializedInputSignalLength);
 
     		// Filter and decimate the signal block
-    		if (Signal::decimate(signal.samples, signal.len, &decimatedSamples, &decimatedSamplesLength, filter1, filterLength1, MONO_FIRST_DECIMATION_FACTOR) < 0)
+    		if (Signal::decimate(initializedInputSignal, initializedInputSignalLength, &decimatedSamples, &decimatedSamplesLength, filter1, filterLength1, MONO_FIRST_DECIMATION_FACTOR) < 0)
     		{
     			return -1;
     		}

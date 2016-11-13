@@ -8,18 +8,12 @@
 class Signal
 {
     public:
-		// Complex signal created from raw data
-        Complex * samples;
-
-        // Number of samples of the complex signal
-        int len;
-
         // Constructors and destructor
         Signal();
-        Signal(unsigned char * buffer, int length);
         virtual ~Signal();
 
         // Various signal operations
+        static int initSignalFromSocket(unsigned char * in, int inLength, Complex ** out, int * outLength);
         static int decimate(Complex * in, int inLength, Complex ** out, int * outLength, double * filter, int filterLength, int factor);
         static int decimate(double * in, int inLength, double ** out, int * outLength, double * filter, int filterLength, int factor);
         static int fmDemodulate(Complex * in, int inLength, double ** out, int * outLength);

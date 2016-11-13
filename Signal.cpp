@@ -5,61 +5,46 @@ Signal::Signal()
 {
 }
 
-// Instantiate a signal object based on samples received from the rtl_tcp program
-Signal::Signal(unsigned char * buffer, int length)
+int Signal::initSignalFromSocket(unsigned char * in, int inLength, Complex ** out, int * outLength)
 {
     int i;
-    len = length;
+
+    if (inLength <= 0)
+    {
+    	printf("Signal from socket length is not valid\n");
+    	return -1;
+    }
+
+    if (in == NULL)
+    {
+    	printf("Invalid signal buffer received when initializing signal from socket\n");
+    	return -1;
+    }
+
+    *outLength = inLength / 2;
+    unsigned long int size = *outLength * sizeof(Complex);
 
     // Allocate the block of complex samples
-    samples = (Complex *) malloc(len * sizeof(Complex));
-    if (samples == NULL)
+    if (*out == NULL)
     {
-    	printf("Could not allocate samples buffer in signal constructor!\n");
-    	return;
+    	*out = (Complex *) malloc(size);
+    }
+
+    if (*out == NULL)
+    {
+    	printf("Could not allocate samples buffer when initializing signal from socket!\n");
+    	return -1;
     }
 
     // Construct the block of complex samples centered around 0
     // from the raw signal encoded as unsigned char values
-    for (i = 0; i < len; i++)
+    for (i = 0; i < *outLength; i++)
     {
-        samples[i].re = (unsigned char)buffer[2 * i] - 127;
-        samples[i].im = (unsigned char)buffer[2 * i + 1] - 127;
-    }
-}
-
-// Filter a complex sample from the input signal with the given filter
-Complex Signal::filterSample(Complex * in, int index, double * filter, int filterLength)
-{
-    Complex c(0,0);
-    int i;
-
-    for (i = 0; i < filterLength; i++)
-    {
-    	if (index - i >= 0)
-        {
-    		c += in[index - i] * filter[filterLength - i - 1];
-        }
+        (*out)[i].re = (unsigned char)in[2 * i] - 127;
+        (*out)[i].im = (unsigned char)in[2 * i + 1] - 127;
     }
 
-    return c;
-}
-
-// Filter a sample from the input real signal with the given signal
-double Signal::filterSample(double * in, int index, double * filter, int filterLength)
-{
-    double c = 0;
-    int i;
-
-    for (i = 0; i < filterLength; i++)
-    {
-        if (index - i >= 0)
-        {
-            c += in[index - i] * filter[filterLength - i - 1];
-        }
-    }
-
-    return c;
+    return 0;
 }
 
 // Decimate a complex signal and filter or not before decimation
@@ -613,5 +598,4 @@ double Signal::toPowerDb(double in)
 // Destructor that frees the initial signal block
 Signal::~Signal()
 {
-	free (samples);
 }

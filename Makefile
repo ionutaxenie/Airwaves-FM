@@ -1,6 +1,6 @@
 OBJS = Complex.o Signal.o SocketManager.o SoundPlayer.o main.o
 CC = g++
-CFLAGS = -Wall -c -O3
+CFLAGS = -std=c++11 -g -Wall -c -O3
 LFLAGS = -Wall
 
 airwaves_fm : $(OBJS)
@@ -22,4 +22,4 @@ main.o : main.cpp
 	$(CC) $(CFLAGS) main.cpp -lpthread
 
 clean :
-	\rm *.o *~ airwaves_fm
+	\rm *.o *~ airwaves_fm core

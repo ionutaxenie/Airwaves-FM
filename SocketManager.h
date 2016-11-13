@@ -18,7 +18,7 @@
 #include <netdb.h>
 
 // Enum that has all possible command for rtl_tcp
-enum command
+enum class Command
 {
 	SET_FREQUENCY = (char)0x01,
 	SET_SAMPLING_RATE = (char)0x02,
@@ -37,6 +37,21 @@ enum command
 	SET_GAIN_BY_PERC = (char)0x7f
 };
 
+class SocketCommand
+{
+public:
+	SocketCommand(Command command = Command::SET_AGC_MODE, unsigned int value = 0);
+	Command GetCommand();
+	unsigned int GetValue();
+	void SetCommand(Command command);
+	void SetValue(unsigned int value);
+	static SocketCommand GetCloseCommand();
+private:
+	Command command;
+	unsigned int value;
+	static SocketCommand closeCommand;
+};
+
 class SocketManager {
 public:
 	// Constructors and destructor
@@ -46,11 +61,10 @@ public:
 
 	// Various method used to interface with rtl_tcp
 	int ConnectToSocket();
-	int WriteToSocket(void * message, unsigned int size);
 	int ReadFromSocket(unsigned char * message, int numberOfBytes);
 	int DisconnectFromSocket();
 	int ConnectToDevice(unsigned int frequency, char * gain, unsigned int sampleRate, bool supressOutput);
-	int SendCommand(command cmd, unsigned int value);
+	int SendCommand(SocketCommand command);
 	void DisconnectFromDevice();
 	void Init(char * ip, int port);
 
@@ -62,6 +76,8 @@ private:
 	struct sockaddr_in serv_addr;
 	struct hostent *server;
 	char ipAddress[30];
+
+	int WriteToSocket(void * message, unsigned int size);
 };
 
 #endif /* SOCKETMANAGER_H_ */

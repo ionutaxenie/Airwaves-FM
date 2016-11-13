@@ -20,21 +20,7 @@ SocketManager::~SocketManager()
 // Constructor that does socket initialization
 SocketManager::SocketManager(char * ip, int port)
 {
-	strcpy(ipAddress, ip);
-	portno = port;
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd < 0)
-		printf("ERROR opening socket\n");
-	server = gethostbyname(ipAddress);
-	if (server == NULL) {
-		fprintf(stderr,"ERROR, no such host\n");
-	}
-	memset((char *) &serv_addr, 0, sizeof(serv_addr));
-	serv_addr.sin_family = AF_INET;
-	memcpy((char *)server->h_addr,
-		 (char *)&serv_addr.sin_addr.s_addr,
-		 server->h_length);
-	serv_addr.sin_port = htons(portno);
+	Init(ip, port);
 }
 
 // Method that initializes the socket
@@ -89,7 +75,8 @@ int SocketManager::ReadFromSocket(unsigned char * message, int numberOfBytes)
 int SocketManager::DisconnectFromSocket()
 {
 	int res;
-	res = SendCommand(CLOSE_RTL_TCP, 0);
+	SocketCommand closeCommand = SocketCommand::GetCloseCommand();
+	res = SendCommand(closeCommand);
 	if (res < 0)
 	{
 		return -1;
@@ -135,12 +122,13 @@ void SocketManager::DisconnectFromDevice()
 }
 
 // Method for sending a command to the rtl_tcp client via socket
-int SocketManager::SendCommand(command cmd, unsigned int value)
+int SocketManager::SendCommand(SocketCommand command)
 {
 	int res;
+	Command cmd = command.GetCommand();
 	switch(cmd)
 	{
-	case CLOSE_RTL_TCP:
+	case Command::CLOSE_RTL_TCP:
 		res = WriteToSocket( &cmd, 1);
 		if (res < 0)
 		{
@@ -155,6 +143,7 @@ int SocketManager::SendCommand(command cmd, unsigned int value)
 			printf("Unable to send command %d\n", cmd);
 			return -1;
 		}
+		unsigned int value = command.GetValue();
 		unsigned int val = htonl(value);
 		res = WriteToSocket( &val, 4);
 		if (res < 0)
@@ -165,4 +154,37 @@ int SocketManager::SendCommand(command cmd, unsigned int value)
 	}
 
 	return 0;
+}
+
+SocketCommand SocketCommand::closeCommand(Command::CLOSE_RTL_TCP);
+
+SocketCommand::SocketCommand(Command command, unsigned int value) :
+		command(command),
+		value(value)
+{
+}
+
+Command SocketCommand::GetCommand()
+{
+	return command;
+}
+
+unsigned int SocketCommand::GetValue()
+{
+	return value;
+}
+
+void SocketCommand::SetCommand(Command command)
+{
+	this->command = command;
+}
+
+void SocketCommand::SetValue(unsigned int value)
+{
+	this->value = value;
+}
+
+SocketCommand SocketCommand::GetCloseCommand()
+{
+	return closeCommand;
 }
