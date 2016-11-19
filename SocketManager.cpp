@@ -140,7 +140,7 @@ int SocketManager::SendCommand(SocketCommand command)
 		res = WriteToSocket( &cmd, 1);
 		if (res < 0)
 		{
-			printf("Unable to send command %d\n", cmd);
+			printf("Unable to send command %c\n", static_cast<char>(cmd));
 			return -1;
 		}
 		unsigned int value = command.GetValue();
@@ -148,7 +148,7 @@ int SocketManager::SendCommand(SocketCommand command)
 		res = WriteToSocket( &val, 4);
 		if (res < 0)
 		{
-			printf("Unable to send value %d for command %d\n", value, cmd);
+			printf("Unable to send value %d for command %c\n", value, static_cast<char>(cmd));
 		}
 		break;
 	}
