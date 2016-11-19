@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.6)
 project(Airwaves-FM)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
