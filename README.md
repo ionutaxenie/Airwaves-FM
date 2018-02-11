@@ -16,7 +16,7 @@ Compile using the given Makefile with the classic "make" command.
 
 ## Usage
 
-./airwaves_fm -m "mod" -f "frequency" -o "order"
+./airwaves_fm -m "mode" -f "frequency" -o "order"
 
 where "mode" can be mono or stereo, "frequency" can be a frequency in the FM band and "order" can be an order for the used filters in the range 2-200. For some unknown reason the application gives a segfault if the order is very high (somewhere in the range 180-200).
 
