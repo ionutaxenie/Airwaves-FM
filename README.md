@@ -1,17 +1,20 @@
-Airwaves FM is a software defined FM radio receiver that uses the RTL-SDR receiver.
+# Airwaves FM
 
-In order to get this thing up and running you need:
+Airwaves FM is a software defined FM radio receiver that uses the RTL-SDR receiver.
+As a bonus you have around 18700 FIR filters generated using Matlab with the window method using a Blackman window. Their orders range from 2 to 200 and their frequencies from 0.01 to 0.99 with an increment of 0.01. The code that generated them is also provided.
+
+## Prerequisite
 
 * Linux distro (was tested on Ubuntu 14.04 ONLY). It should not be hard to modify to make it work on Windows or other OS if you have the experience.
 * GNU C++ compiler or another C++ compiler
 * the rtl-sdr library librtlsdr with rtl_tcp (which should come with the library)
 * Pulse Audio library libpulse
 
+## Compilation
+
 Compile using the given Makefile with the classic "make" command.
 
-As a bonus you have around 18700 FIR filters generated using Matlab with the window method using a Blackman window. Their orders range from 2 to 200 and their frequencies from 0.01 to 0.99 with an increment of 0.01. The code that generated them is also provided.
-
-The program is started using:
+## Usage
 
 ./airwaves_fm -m "mod" -f "frequency" -o "order"
 
@@ -26,6 +29,6 @@ The program accepts the following runtime commands:
 * power=? to print the mean power of a 250 ms signal block before demodulation in dB relative to the level of 1
 * quit to exit the program correctly
 
-This project was developed as my final project for telecommunications engineering degree. It was very challenging to make as I did not have too much experience with discrete signals in C++ and I am aware it could have been much better. Looking forward for some other people to make this more amazing then it currently is.
+## License
 
-If you have any issues or questions email me at ionut.axenie@yahoo.com
+The program is released unde the three-clause BSD License. You can find the full license text in License.txt
