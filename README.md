@@ -3,7 +3,7 @@
 Airwaves FM is a software defined FM radio receiver that uses the RTL-SDR receiver.
 As a bonus you have around 18700 FIR filters generated using Matlab with the window method using a Blackman window. Their orders range from 2 to 200 and their frequencies from 0.01 to 0.99 with an increment of 0.01. The code that generated them is also provided.
 
-## Prerequisite
+## Prerequisites
 
 * Linux distro (was tested on Ubuntu 14.04 ONLY). It should not be hard to modify to make it work on Windows or other OS if you have the experience.
 * GNU C++ compiler or another C++ compiler
