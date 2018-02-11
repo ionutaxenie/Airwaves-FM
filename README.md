@@ -31,4 +31,4 @@ The program accepts the following runtime commands:
 
 ## License
 
-The program is released unde the three-clause BSD License. You can find the full license text in License.txt
+The program is released under the three-clause BSD License. You can find the full license text in License.txt.
